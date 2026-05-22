@@ -10,7 +10,7 @@ outputs:
   tenki-version:
     description: Resolved version installed
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
 branding:
   icon: download

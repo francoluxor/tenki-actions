@@ -59,7 +59,7 @@ outputs:
   template-build-state:
     description: Template build state.
 runs:
-  using: node20
+  using: node24
   main: dist/index.js
 branding:
   icon: upload-cloud

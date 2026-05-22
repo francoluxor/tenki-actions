@@ -10,7 +10,7 @@ jobs:
       TENKI_API_ENDPOINT: ${{ secrets.TENKI_API_ENDPOINT }}
       TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
       - uses: ./setup-cli
       - uses: ./template-publish
         id: create
