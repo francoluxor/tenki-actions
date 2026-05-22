@@ -19,6 +19,7 @@ export interface Inputs {
   env: string;
   envPrefix: string;
   waitTimeout: string;
+  waitDurable: boolean;
   configFields: string[];
   baseImageIdSet: boolean;
 }
@@ -42,6 +43,7 @@ export async function readInputs(): Promise<Inputs> {
     env: core.getInput("env"),
     envPrefix: core.getInput("env-prefix") || "TENKI_TPL_",
     waitTimeout: core.getInput("wait-timeout") || "15m",
+    waitDurable: parseBooleanInput(core.getInput("wait-durable"), true),
     configFields: [],
     baseImageIdSet: baseImageId !== "",
   };
@@ -85,6 +87,14 @@ function configFields(inputs: Inputs): string[] {
   if (inputs.diskSizeGb) fields.push("disk-size-gb");
   if (inputs.env) fields.push("env");
   return fields;
+}
+
+function parseBooleanInput(value: string, defaultValue: boolean): boolean {
+  const v = value.trim().toLowerCase();
+  if (v === "") return defaultValue;
+  if (["true", "1", "yes", "on"].includes(v)) return true;
+  if (["false", "0", "no", "off"].includes(v)) return false;
+  throw new Error(`invalid boolean input: ${value}`);
 }
 
 async function resolveSetupScript(): Promise<string> {

@@ -20,6 +20,9 @@ async function run(): Promise<void> {
   let build: BuildResult | undefined;
   let publication: PublishResult | undefined;
 
+  const waitTimeout = inputs.waitTimeout;
+  const waitDurable = inputs.waitDurable;
+
   if (inputs.mode === "create") {
     core.info("creating template");
     const created = await step("create", () =>
@@ -41,7 +44,7 @@ async function run(): Promise<void> {
       ]),
     );
     templateId = created.template_id;
-    build = await buildTemplate(templateId, inputs.waitTimeout);
+    build = await buildTemplate(templateId, waitTimeout, waitDurable);
     publication = await publishTemplate(templateId);
   } else if (inputs.mode === "update") {
     core.info("updating template");
@@ -56,10 +59,10 @@ async function run(): Promise<void> {
         "--json",
       ]),
     );
-    build = await buildTemplate(templateId, inputs.waitTimeout);
+    build = await buildTemplate(templateId, waitTimeout, waitDurable);
     publication = await publishTemplate(templateId);
   } else if (inputs.mode === "build-only") {
-    build = await buildTemplate(templateId, inputs.waitTimeout);
+    build = await buildTemplate(templateId, waitTimeout, waitDurable);
   } else {
     publication = await publishTemplate(templateId);
   }
@@ -83,19 +86,10 @@ function configArgs(inputs: Inputs): string[] {
   return args;
 }
 
-async function buildTemplate(templateId: string, waitTimeout: string): Promise<BuildResult> {
-  const build = await step("build", () =>
-    tenkiJSON<BuildResult>([
-      "sandbox",
-      "template",
-      "build",
-      templateId,
-      "--wait",
-      "--wait-timeout",
-      waitTimeout,
-      "--json",
-    ]),
-  );
+async function buildTemplate(templateId: string, waitTimeout: string, waitDurable: boolean): Promise<BuildResult> {
+  const args = ["sandbox", "template", "build", templateId, "--wait", "--wait-timeout", waitTimeout, "--json"];
+  if (waitDurable) args.push("--wait-durable");
+  const build = await step("build", () => tenkiJSON<BuildResult>(args));
   if (build.template_build_state === "failed") {
     throw new Error(build.failure_reason ? `template build failed: ${build.failure_reason}` : "template build failed");
   }

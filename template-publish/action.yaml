@@ -49,6 +49,10 @@ inputs:
     description: Build wait timeout.
     required: false
     default: 15m
+  wait-durable:
+    description: Also wait for the snapshot R2 upload to finish (recommended). Defaults to true.
+    required: false
+    default: 'true'
 outputs:
   template-id:
     description: Template ID.

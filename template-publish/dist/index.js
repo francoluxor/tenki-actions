@@ -31020,6 +31020,7 @@ async function readInputs() {
         env: getInput("env"),
         envPrefix: getInput("env-prefix") || "TENKI_TPL_",
         waitTimeout: getInput("wait-timeout") || "15m",
+        waitDurable: parseBooleanInput(getInput("wait-durable"), true),
         configFields: [],
         baseImageIdSet: baseImageId !== "",
     };
@@ -31075,6 +31076,16 @@ function configFields(inputs) {
         fields.push("env");
     return fields;
 }
+function parseBooleanInput(value, defaultValue) {
+    const v = value.trim().toLowerCase();
+    if (v === "")
+        return defaultValue;
+    if (["true", "1", "yes", "on"].includes(v))
+        return true;
+    if (["false", "0", "no", "off"].includes(v))
+        return false;
+    throw new Error(`invalid boolean input: ${value}`);
+}
 async function resolveSetupScript() {
     const inline = getInput("setup-script");
     const scriptPath = getInput("setup-script-path");
@@ -31110,6 +31121,8 @@ async function run() {
     let templateId = inputs.templateId;
     let build;
     let publication;
+    const waitTimeout = inputs.waitTimeout;
+    const waitDurable = inputs.waitDurable;
     if (inputs.mode === "create") {
         info("creating template");
         const created = await step("create", () => tenkiJSON([
@@ -31129,7 +31142,7 @@ async function run() {
             "--json",
         ]));
         templateId = created.template_id;
-        build = await buildTemplate(templateId, inputs.waitTimeout);
+        build = await buildTemplate(templateId, waitTimeout, waitDurable);
         publication = await publishTemplate(templateId);
     }
     else if (inputs.mode === "update") {
@@ -31143,11 +31156,11 @@ async function run() {
             ...forwardedArgs,
             "--json",
         ]));
-        build = await buildTemplate(templateId, inputs.waitTimeout);
+        build = await buildTemplate(templateId, waitTimeout, waitDurable);
         publication = await publishTemplate(templateId);
     }
     else if (inputs.mode === "build-only") {
-        build = await buildTemplate(templateId, inputs.waitTimeout);
+        build = await buildTemplate(templateId, waitTimeout, waitDurable);
     }
     else {
         publication = await publishTemplate(templateId);
@@ -31174,17 +31187,11 @@ function configArgs(inputs) {
         args.push("--disk-size-gb", inputs.diskSizeGb);
     return args;
 }
-async function buildTemplate(templateId, waitTimeout) {
-    const build = await step("build", () => tenkiJSON([
-        "sandbox",
-        "template",
-        "build",
-        templateId,
-        "--wait",
-        "--wait-timeout",
-        waitTimeout,
-        "--json",
-    ]));
+async function buildTemplate(templateId, waitTimeout, waitDurable) {
+    const args = ["sandbox", "template", "build", templateId, "--wait", "--wait-timeout", waitTimeout, "--json"];
+    if (waitDurable)
+        args.push("--wait-durable");
+    const build = await step("build", () => tenkiJSON(args));
     if (build.template_build_state === "failed") {
         throw new Error(build.failure_reason ? `template build failed: ${build.failure_reason}` : "template build failed");
     }
