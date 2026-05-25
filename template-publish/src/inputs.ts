@@ -10,6 +10,8 @@ export interface Inputs {
   workspaceId: string;
   name: string;
   templateId: string;
+  image: string;
+  visibility: string;
   setupScript: string;
   baseImageId: string;
   tags: string;
@@ -34,6 +36,8 @@ export async function readInputs(): Promise<Inputs> {
     workspaceId: core.getInput("workspace-id"),
     name: core.getInput("name"),
     templateId: core.getInput("template-id"),
+    image: core.getInput("image"),
+    visibility: core.getInput("visibility") || "public",
     setupScript,
     baseImageId: baseImageId || (mode === "create" ? "sandbox" : ""),
     tags: core.getInput("tags"),
@@ -70,6 +74,18 @@ function validate(inputs: Inputs): void {
   }
   if ((inputs.mode === "build-only" || inputs.mode === "publish-only") && inputs.configFields.length > 0) {
     errors.push(`incompatible inputs: config fields are not accepted with mode ${inputs.mode}`);
+  }
+  if (inputs.mode === "build-only" && inputs.image) {
+    errors.push("incompatible inputs: image is not accepted with mode build-only");
+  }
+  if (inputs.mode === "build-only" && inputs.visibility !== "public") {
+    errors.push("incompatible inputs: visibility is not accepted with mode build-only");
+  }
+  if (!["private", "public"].includes(inputs.visibility)) {
+    errors.push(`invalid visibility: ${inputs.visibility}`);
+  }
+  if (inputs.visibility !== "public" && !inputs.image) {
+    errors.push("incompatible inputs: visibility requires image");
   }
   if (errors.length > 0) {
     for (const error of errors) core.error(error);

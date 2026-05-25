@@ -17,6 +17,13 @@ inputs:
   template-id:
     description: Template ID. Required for update, build-only, and publish-only.
     required: false
+  image:
+    description: Registry image ref <workspace>/<artifact>[:tag]. Uses registry publish when set.
+    required: false
+  visibility:
+    description: Registry visibility for published image, private or public.
+    required: false
+    default: public
   setup-script:
     description: Inline setup script.
     required: false
@@ -56,8 +63,14 @@ inputs:
 outputs:
   template-id:
     description: Template ID.
+  artifact-id:
+    description: Registry artifact ID, empty for build-only.
+  snapshot-id:
+    description: Published snapshot ID, empty for build-only.
+  image:
+    description: Published image ref, empty for build-only.
   publication-id:
-    description: Publication ID, empty for build-only.
+    description: Deprecated alias for artifact-id. Empty for build-only.
   template-build-id:
     description: Template build ID.
   template-build-state:

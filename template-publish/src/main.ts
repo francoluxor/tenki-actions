@@ -45,7 +45,7 @@ async function run(): Promise<void> {
     );
     templateId = created.template_id;
     build = await buildTemplate(templateId, waitTimeout, waitDurable);
-    publication = await publishTemplate(templateId);
+    publication = await publishTemplate(templateId, inputs);
   } else if (inputs.mode === "update") {
     core.info("updating template");
     await step("update", () =>
@@ -60,17 +60,20 @@ async function run(): Promise<void> {
       ]),
     );
     build = await buildTemplate(templateId, waitTimeout, waitDurable);
-    publication = await publishTemplate(templateId);
+    publication = await publishTemplate(templateId, inputs);
   } else if (inputs.mode === "build-only") {
     build = await buildTemplate(templateId, waitTimeout, waitDurable);
   } else {
-    publication = await publishTemplate(templateId);
+    publication = await publishTemplate(templateId, inputs);
   }
 
   core.setOutput("template-id", templateId);
-  core.setOutput("publication-id", publication?.publication_id ?? "");
+  core.setOutput("artifact-id", publication?.artifact_id ?? publication?.publication_id ?? "");
+  core.setOutput("snapshot-id", publication?.snapshot_id ?? "");
+  core.setOutput("image", publication?.image ?? "");
+  core.setOutput("publication-id", publication?.artifact_id ?? publication?.publication_id ?? "");
   core.setOutput("template-build-id", build?.template_build_id ?? publication?.template_build_id ?? "");
-  core.setOutput("template-build-state", build?.template_build_state ?? "");
+  core.setOutput("template-build-state", build?.template_build_state ?? publication?.template_build_state ?? "");
 }
 
 function configArgs(inputs: Inputs): string[] {
@@ -96,8 +99,24 @@ async function buildTemplate(templateId: string, waitTimeout: string, waitDurabl
   return build;
 }
 
-async function publishTemplate(templateId: string): Promise<PublishResult> {
-  return step("publish", () => tenkiJSON<PublishResult>(["sandbox", "template", "publish", templateId, "--json"]));
+async function publishTemplate(templateId: string, inputs: Inputs): Promise<PublishResult> {
+  if (!inputs.image) {
+    return step("publish", () => tenkiJSON<PublishResult>(["sandbox", "template", "publish", templateId, "--json"]));
+  }
+  return step("publish", () =>
+    tenkiJSON<PublishResult>([
+      "sandbox",
+      "registry",
+      "publish",
+      "--from-template",
+      templateId,
+      "--image",
+      inputs.image,
+      "--visibility",
+      inputs.visibility,
+      "--json",
+    ]),
+  );
 }
 
 async function step<T>(name: string, fn: () => Promise<T>): Promise<T> {

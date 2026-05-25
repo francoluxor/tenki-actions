@@ -18,10 +18,14 @@ export interface BuildResult {
 }
 
 export interface PublishResult {
-  template_id: string;
-  publication_id: string;
+  artifact_id: string;
+  snapshot_id: string;
+  image: string;
   template_build_id: string;
-  published_at: string;
+  template_build_state: string;
+  publication_id?: string;
+  template_id: string;
+  published_at?: string;
 }
 
 export async function requireTenki(): Promise<void> {

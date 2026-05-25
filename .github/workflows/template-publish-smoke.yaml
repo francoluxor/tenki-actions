@@ -20,6 +20,8 @@ jobs:
           project-id: ${{ secrets.TENKI_PROJECT_ID }}
           name: gha-smoke-${{ github.run_id }}
           setup-script: echo smoke
+          image: ${{ secrets.TENKI_WORKSPACE_SLUG }}/gha-smoke-${{ github.run_id }}:prod
+          visibility: public
       - uses: ./template-publish
         id: update
         with:
@@ -27,7 +29,9 @@ jobs:
           project-id: ${{ secrets.TENKI_PROJECT_ID }}
           template-id: ${{ steps.create.outputs.template-id }}
           setup-script: echo smoke update
-      - run: test "${{ steps.create.outputs.publication-id }}" != "${{ steps.update.outputs.publication-id }}"
+          image: ${{ secrets.TENKI_WORKSPACE_SLUG }}/gha-smoke-${{ github.run_id }}:prod
+          visibility: public
+      - run: test "${{ steps.create.outputs.snapshot-id }}" != "${{ steps.update.outputs.snapshot-id }}"
       - if: always() && steps.create.outputs.template-id != ''
         run: |
           for attempt in 1 2 3; do

@@ -7,7 +7,8 @@ Drives sandbox template publishing through the `tenki` CLI. Add `setup-cli` firs
 - `tenki sandbox template create --json`
 - `tenki sandbox template update --json`
 - `tenki sandbox template build --wait --json`
-- `tenki sandbox template publish --json`
+- `tenki sandbox registry publish --json` when `image` is set
+- `tenki sandbox template publish --json` as the deprecated no-image compatibility path
 
 ## Prerequisites
 
@@ -49,6 +50,8 @@ jobs:
           memory-mb: "8192"
           disk-size-gb: "40"
           env: NODE_AUTH_TOKEN
+          image: my-workspace/ci-template:latest
+          visibility: public
       - run: echo "Template ${{ steps.publish.outputs.template-id }}"
 ```
 
@@ -99,7 +102,7 @@ Use this when another job must smoke test before publishing.
     template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
 ```
 
-`publication-id` is empty in this mode.
+`artifact-id`, `snapshot-id`, `image`, and deprecated `publication-id` are empty in this mode.
 
 ## Publish current successful build (`mode: publish-only`)
 
@@ -114,6 +117,7 @@ Use this after an external smoke test passes.
     mode: publish-only
     project-id: ${{ secrets.TENKI_PROJECT_ID }}
     template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
+    image: my-workspace/ci-template:latest
 ```
 
 The Tenki API rejects this mode if the template has no successful latest build.
@@ -168,6 +172,8 @@ jobs:
 | `workspace-id` | create | create | Tenki workspace ID. Required because GitHub runners have no saved workspace context. |
 | `name` | create | create | Template name for a new template. |
 | `template-id` | non-create | update, build-only, publish-only | Existing template ID. Rejected in `create`. |
+| `image` | No | create, update, publish-only | Registry image ref `<workspace>/<artifact>[:tag]`. When set, publish uses `tenki sandbox registry publish`. Omit only for legacy template publish compatibility. |
+| `visibility` | No | create, update, publish-only | Registry visibility, `public` or `private`. Default `public`. Requires `image` when not `public`. |
 | `setup-script` | create if no path | create, update | Inline setup script. Mutually exclusive with `setup-script-path`. |
 | `setup-script-path` | create if no inline script | create, update | Path to setup script, relative to `GITHUB_WORKSPACE` unless absolute. |
 | `base-image-id` | No | create, update | Base image ID. Defaults to `sandbox` in `create`. Only sent in `update` when explicitly supplied. |
@@ -184,7 +190,10 @@ jobs:
 | Output | Description |
 | --- | --- |
 | `template-id` | Template ID created or operated on. |
-| `publication-id` | Publication ID from publish. Empty in `build-only`. |
+| `artifact-id` | Registry artifact ID from publish. Empty in `build-only`. |
+| `snapshot-id` | Snapshot ID from publish. Empty in `build-only`. |
+| `image` | Published image ref. Empty in `build-only`. |
+| `publication-id` | Deprecated alias for `artifact-id`. Empty in `build-only`. |
 | `template-build-id` | Build ID from create/update/build-only, or build ID used by publish-only. |
 | `template-build-state` | Build state from build modes, for example `succeeded` or `failed`. |
 

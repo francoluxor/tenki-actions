@@ -31011,6 +31011,8 @@ async function readInputs() {
         workspaceId: getInput("workspace-id"),
         name: getInput("name"),
         templateId: getInput("template-id"),
+        image: getInput("image"),
+        visibility: getInput("visibility") || "public",
         setupScript,
         baseImageId: baseImageId || (mode === "create" ? "sandbox" : ""),
         tags: getInput("tags"),
@@ -31051,6 +31053,18 @@ function validate(inputs) {
     }
     if ((inputs.mode === "build-only" || inputs.mode === "publish-only") && inputs.configFields.length > 0) {
         errors.push(`incompatible inputs: config fields are not accepted with mode ${inputs.mode}`);
+    }
+    if (inputs.mode === "build-only" && inputs.image) {
+        errors.push("incompatible inputs: image is not accepted with mode build-only");
+    }
+    if (inputs.mode === "build-only" && inputs.visibility !== "public") {
+        errors.push("incompatible inputs: visibility is not accepted with mode build-only");
+    }
+    if (!["private", "public"].includes(inputs.visibility)) {
+        errors.push(`invalid visibility: ${inputs.visibility}`);
+    }
+    if (inputs.visibility !== "public" && !inputs.image) {
+        errors.push("incompatible inputs: visibility requires image");
     }
     if (errors.length > 0) {
         for (const error of errors)
@@ -31143,7 +31157,7 @@ async function run() {
         ]));
         templateId = created.template_id;
         build = await buildTemplate(templateId, waitTimeout, waitDurable);
-        publication = await publishTemplate(templateId);
+        publication = await publishTemplate(templateId, inputs);
     }
     else if (inputs.mode === "update") {
         info("updating template");
@@ -31157,18 +31171,21 @@ async function run() {
             "--json",
         ]));
         build = await buildTemplate(templateId, waitTimeout, waitDurable);
-        publication = await publishTemplate(templateId);
+        publication = await publishTemplate(templateId, inputs);
     }
     else if (inputs.mode === "build-only") {
         build = await buildTemplate(templateId, waitTimeout, waitDurable);
     }
     else {
-        publication = await publishTemplate(templateId);
+        publication = await publishTemplate(templateId, inputs);
     }
     setOutput("template-id", templateId);
-    setOutput("publication-id", publication?.publication_id ?? "");
+    setOutput("artifact-id", publication?.artifact_id ?? publication?.publication_id ?? "");
+    setOutput("snapshot-id", publication?.snapshot_id ?? "");
+    setOutput("image", publication?.image ?? "");
+    setOutput("publication-id", publication?.artifact_id ?? publication?.publication_id ?? "");
     setOutput("template-build-id", build?.template_build_id ?? publication?.template_build_id ?? "");
-    setOutput("template-build-state", build?.template_build_state ?? "");
+    setOutput("template-build-state", build?.template_build_state ?? publication?.template_build_state ?? "");
 }
 function configArgs(inputs) {
     const args = [];
@@ -31197,8 +31214,22 @@ async function buildTemplate(templateId, waitTimeout, waitDurable) {
     }
     return build;
 }
-async function publishTemplate(templateId) {
-    return step("publish", () => tenkiJSON(["sandbox", "template", "publish", templateId, "--json"]));
+async function publishTemplate(templateId, inputs) {
+    if (!inputs.image) {
+        return step("publish", () => tenkiJSON(["sandbox", "template", "publish", templateId, "--json"]));
+    }
+    return step("publish", () => tenkiJSON([
+        "sandbox",
+        "registry",
+        "publish",
+        "--from-template",
+        templateId,
+        "--image",
+        inputs.image,
+        "--visibility",
+        inputs.visibility,
+        "--json",
+    ]));
 }
 async function step(name, fn) {
     try {
