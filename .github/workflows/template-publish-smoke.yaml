@@ -34,6 +34,8 @@ jobs:
       - run: test "${{ steps.create.outputs.snapshot-id }}" != "${{ steps.update.outputs.snapshot-id }}"
       - if: always() && steps.create.outputs.template-id != ''
         run: |
+          set -euo pipefail
+          tenki sandbox registry delete "${{ secrets.TENKI_WORKSPACE_SLUG }}/gha-smoke-${{ github.run_id }}" || true
           for attempt in 1 2 3; do
             if tenki sandbox template delete "${{ steps.create.outputs.template-id }}"; then
               exit 0
