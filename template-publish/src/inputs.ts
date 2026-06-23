@@ -22,6 +22,7 @@ export interface Inputs {
   envPrefix: string;
   waitTimeout: string;
   waitDurable: boolean;
+  publishRawImage?: boolean;
   configFields: string[];
   baseImageIdSet: boolean;
 }
@@ -48,6 +49,7 @@ export async function readInputs(): Promise<Inputs> {
     envPrefix: core.getInput("env-prefix") || "TENKI_TPL_",
     waitTimeout: core.getInput("wait-timeout") || "15m",
     waitDurable: parseBooleanInput(core.getInput("wait-durable"), true),
+    publishRawImage: parseOptionalBooleanInput(core.getInput("publish-raw-image")),
     configFields: [],
     baseImageIdSet: baseImageId !== "",
   };
@@ -87,6 +89,9 @@ function validate(inputs: Inputs): void {
   if (inputs.visibility !== "public" && !inputs.image) {
     errors.push("incompatible inputs: visibility requires image");
   }
+  if (inputs.mode === "publish-only" && inputs.publishRawImage !== undefined) {
+    errors.push("incompatible inputs: publish-raw-image is not accepted with mode publish-only");
+  }
   if (errors.length > 0) {
     for (const error of errors) core.error(error);
     throw new Error(errors[0]);
@@ -111,6 +116,12 @@ function parseBooleanInput(value: string, defaultValue: boolean): boolean {
   if (["true", "1", "yes", "on"].includes(v)) return true;
   if (["false", "0", "no", "off"].includes(v)) return false;
   throw new Error(`invalid boolean input: ${value}`);
+}
+
+function parseOptionalBooleanInput(value: string): boolean | undefined {
+  const v = value.trim();
+  if (v === "") return undefined;
+  return parseBooleanInput(v, false);
 }
 
 async function resolveSetupScript(): Promise<string> {

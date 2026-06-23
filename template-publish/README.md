@@ -7,6 +7,7 @@ Drives sandbox template publishing through the `tenki` CLI. Add `setup-cli` firs
 - `tenki sandbox template create --json`
 - `tenki sandbox template update --json`
 - `tenki sandbox template build --wait --json`
+- `tenki sandbox snapshot download-url --file raw-image --json` when a built snapshot has a raw image
 - `tenki sandbox registry publish --json` when `image` is set
 - `tenki sandbox template publish --json` as the deprecated no-image compatibility path
 
@@ -50,9 +51,11 @@ jobs:
           memory-mb: "8192"
           disk-size-gb: "40"
           env: NODE_AUTH_TOKEN
+          publish-raw-image: "true"
           image: my-workspace/ci-template:latest
           visibility: public
       - run: echo "Template ${{ steps.publish.outputs.template-id }}"
+      - run: echo "Raw image URL ${{ steps.publish.outputs.raw-image-url }}"
 ```
 
 Save `steps.publish.outputs.template-id` as a repository secret or variable before switching to `mode: update`.
@@ -184,6 +187,8 @@ jobs:
 | `env` | No | create, update | Newline-separated workflow env var names to forward, or `*` to forward vars matching `env-prefix`. |
 | `env-prefix` | No | create, update | Prefix used with `env: '*'`. Default `TENKI_TPL_`. |
 | `wait-timeout` | No | create, update, build-only | Build wait timeout. Default `15m`. |
+| `wait-durable` | No | create, update, build-only | Also wait for snapshot durability before finishing. Default `true`. |
+| `publish-raw-image` | No | create, update, build-only | Override whether template builds publish a standalone compressed raw disk image. Empty uses the Tenki default. |
 
 ## Outputs
 
@@ -191,7 +196,10 @@ jobs:
 | --- | --- |
 | `template-id` | Template ID created or operated on. |
 | `artifact-id` | Registry artifact ID from publish. Empty in `build-only`. |
-| `snapshot-id` | Snapshot ID from publish. Empty in `build-only`. |
+| `snapshot-id` | Snapshot ID from build or publish. |
+| `raw-image-available` | `true` when the snapshot has a standalone compressed raw disk image. |
+| `raw-image-url` | Short-lived download URL for the raw disk image, empty when unavailable. |
+| `raw-image-expires-at` | Expiration time for `raw-image-url`. |
 | `image` | Published image ref. Empty in `build-only`. |
 | `publication-id` | Deprecated alias for `artifact-id`. Empty in `build-only`. |
 | `template-build-id` | Build ID from create/update/build-only, or build ID used by publish-only. |
@@ -234,3 +242,9 @@ The action validates inputs before invoking `tenki`:
 - Missing `tenki` fails with: `tenki not found on PATH; add 'TenkiCloud/actions/setup-cli@v1' step before this one`.
 
 If build fails, the action exits non-zero and does not call publish. Existing publications stay active.
+
+Raw image URLs are presigned and short-lived. Use the output in the same workflow run, or regenerate later with:
+
+```bash
+tenki sandbox snapshot download-url "$SNAPSHOT_ID" --file raw-image --json
+```

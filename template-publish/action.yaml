@@ -60,13 +60,22 @@ inputs:
     description: Also wait for the snapshot R2 upload to finish (recommended). Defaults to true.
     required: false
     default: 'true'
+  publish-raw-image:
+    description: Override whether template builds publish a standalone compressed raw disk image. Empty uses the Tenki default.
+    required: false
 outputs:
   template-id:
     description: Template ID.
   artifact-id:
     description: Registry artifact ID, empty for build-only.
   snapshot-id:
-    description: Published snapshot ID, empty for build-only.
+    description: Snapshot ID from build or publish.
+  raw-image-available:
+    description: true when the snapshot has a standalone compressed raw disk image.
+  raw-image-url:
+    description: Short-lived download URL for the raw disk image, empty when unavailable.
+  raw-image-expires-at:
+    description: Expiration time for raw-image-url.
   image:
     description: Published image ref, empty for build-only.
   publication-id:

@@ -14,6 +14,7 @@ export interface BuildResult {
   template_id: string;
   template_build_id: string;
   template_build_state: string;
+  snapshot_id?: string;
   failure_reason?: string | null;
 }
 
@@ -26,6 +27,16 @@ export interface PublishResult {
   publication_id?: string;
   template_id: string;
   published_at?: string;
+}
+
+export interface SnapshotResult {
+  id: string;
+  raw_image_available?: boolean;
+}
+
+export interface SnapshotDownloadURLResult {
+  url: string;
+  expires_at?: string;
 }
 
 export async function requireTenki(): Promise<void> {

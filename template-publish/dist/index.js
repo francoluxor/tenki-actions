@@ -31023,6 +31023,7 @@ async function readInputs() {
         envPrefix: getInput("env-prefix") || "TENKI_TPL_",
         waitTimeout: getInput("wait-timeout") || "15m",
         waitDurable: parseBooleanInput(getInput("wait-durable"), true),
+        publishRawImage: parseOptionalBooleanInput(getInput("publish-raw-image")),
         configFields: [],
         baseImageIdSet: baseImageId !== "",
     };
@@ -31066,6 +31067,9 @@ function validate(inputs) {
     if (inputs.visibility !== "public" && !inputs.image) {
         errors.push("incompatible inputs: visibility requires image");
     }
+    if (inputs.mode === "publish-only" && inputs.publishRawImage !== undefined) {
+        errors.push("incompatible inputs: publish-raw-image is not accepted with mode publish-only");
+    }
     if (errors.length > 0) {
         for (const error of errors)
             core_error(error);
@@ -31099,6 +31103,12 @@ function parseBooleanInput(value, defaultValue) {
     if (["false", "0", "no", "off"].includes(v))
         return false;
     throw new Error(`invalid boolean input: ${value}`);
+}
+function parseOptionalBooleanInput(value) {
+    const v = value.trim();
+    if (v === "")
+        return undefined;
+    return parseBooleanInput(v, false);
 }
 async function resolveSetupScript() {
     const inline = getInput("setup-script");
@@ -31156,7 +31166,7 @@ async function run() {
             "--json",
         ]));
         templateId = created.template_id;
-        build = await buildTemplate(templateId, waitTimeout, waitDurable);
+        build = await buildTemplate(templateId, waitTimeout, waitDurable, inputs.publishRawImage);
         publication = await publishTemplate(templateId, inputs);
     }
     else if (inputs.mode === "update") {
@@ -31170,18 +31180,23 @@ async function run() {
             ...forwardedArgs,
             "--json",
         ]));
-        build = await buildTemplate(templateId, waitTimeout, waitDurable);
+        build = await buildTemplate(templateId, waitTimeout, waitDurable, inputs.publishRawImage);
         publication = await publishTemplate(templateId, inputs);
     }
     else if (inputs.mode === "build-only") {
-        build = await buildTemplate(templateId, waitTimeout, waitDurable);
+        build = await buildTemplate(templateId, waitTimeout, waitDurable, inputs.publishRawImage);
     }
     else {
         publication = await publishTemplate(templateId, inputs);
     }
+    const snapshotId = publication?.snapshot_id ?? build?.snapshot_id ?? "";
+    const rawImage = await rawImageOutputs(snapshotId);
     setOutput("template-id", templateId);
     setOutput("artifact-id", publication?.artifact_id ?? publication?.publication_id ?? "");
-    setOutput("snapshot-id", publication?.snapshot_id ?? "");
+    setOutput("snapshot-id", snapshotId);
+    setOutput("raw-image-available", rawImage.available ? "true" : "false");
+    setOutput("raw-image-url", rawImage.url);
+    setOutput("raw-image-expires-at", rawImage.expiresAt);
     setOutput("image", publication?.image ?? "");
     setOutput("publication-id", publication?.artifact_id ?? publication?.publication_id ?? "");
     setOutput("template-build-id", build?.template_build_id ?? publication?.template_build_id ?? "");
@@ -31204,15 +31219,36 @@ function configArgs(inputs) {
         args.push("--disk-size-gb", inputs.diskSizeGb);
     return args;
 }
-async function buildTemplate(templateId, waitTimeout, waitDurable) {
+async function buildTemplate(templateId, waitTimeout, waitDurable, publishRawImage) {
     const args = ["sandbox", "template", "build", templateId, "--wait", "--wait-timeout", waitTimeout, "--json"];
     if (waitDurable)
         args.push("--wait-durable");
+    if (publishRawImage !== undefined)
+        args.push(`--publish-raw-image=${publishRawImage ? "true" : "false"}`);
     const build = await step("build", () => tenkiJSON(args));
     if (build.template_build_state === "failed") {
         throw new Error(build.failure_reason ? `template build failed: ${build.failure_reason}` : "template build failed");
     }
     return build;
+}
+async function rawImageOutputs(snapshotId) {
+    if (!snapshotId) {
+        return { available: false, url: "", expiresAt: "" };
+    }
+    const snapshot = await step("snapshot", () => tenkiJSON(["sandbox", "snapshot", "get", snapshotId, "--json"]));
+    if (!snapshot.raw_image_available) {
+        return { available: false, url: "", expiresAt: "" };
+    }
+    const download = await step("snapshot download url", () => tenkiJSON([
+        "sandbox",
+        "snapshot",
+        "download-url",
+        snapshotId,
+        "--file",
+        "raw-image",
+        "--json",
+    ]));
+    return { available: true, url: download.url ?? "", expiresAt: download.expires_at ?? "" };
 }
 async function publishTemplate(templateId, inputs) {
     if (!inputs.image) {
