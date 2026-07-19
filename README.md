@@ -5,37 +5,39 @@ First-party GitHub Actions for Tenki workflows.
 ## Actions
 
 - [`setup-cli`](./setup-cli) installs the `tenki` CLI on Linux and macOS runners.
-- [`template-publish`](./template-publish) creates, updates, builds, and publishes sandbox templates through the `tenki` CLI.
+- [`template-build`](./template-build) creates or updates and builds sandbox templates from `tenki.template.json`.
+- [`template-publish`](./template-publish) is deprecated and remains available for legacy setup-script templates.
 
 ## Typical template workflow
 
-Use `setup-cli` first, then `template-publish`.
+Use `setup-cli` first, then `template-build`.
 
 ```yaml
-name: Publish sandbox template
+name: Build sandbox template
 
 on:
   push:
     branches: [main]
     paths:
-      - ".tenki/**"
+      - "tenki.template.json"
 
 jobs:
-  publish:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: TenkiCloud/actions/setup-cli@v1
         with:
           version: latest
-      - uses: TenkiCloud/actions/template-publish@v1
+      - uses: TenkiCloud/actions/template-build@v1
+        id: template
         env:
-          TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
+          TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
         with:
-          mode: update
+          template: node-api
+          workspace-id: ${{ secrets.TENKI_WORKSPACE_ID }}
           project-id: ${{ secrets.TENKI_PROJECT_ID }}
-          template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
-          setup-script-path: .tenki/setup.sh
+      - run: echo "Built ${{ steps.template.outputs.image }}"
 ```
 
 ## Version pinning
@@ -44,7 +46,7 @@ Pin action versions by major tag for patch updates:
 
 ```yaml
 - uses: TenkiCloud/actions/setup-cli@v1
-- uses: TenkiCloud/actions/template-publish@v1
+- uses: TenkiCloud/actions/template-build@v1
 ```
 
 Pin the CLI independently:
@@ -57,11 +59,10 @@ Pin the CLI independently:
 
 ## Auth
 
-`template-publish` reads `TENKI_AUTH_TOKEN` from the job environment. Do not pass the token through `with:`.
+`template-build` reads `TENKI_API_KEY` or `TENKI_AUTH_TOKEN` from the job environment. Do not pass credentials through `with:`.
 
 Required secrets for most workflows:
 
-- `TENKI_AUTH_TOKEN`: workspace-scoped Tenki API token.
+- `TENKI_API_KEY` or `TENKI_AUTH_TOKEN`: Tenki API credential.
 - `TENKI_PROJECT_ID`: project that owns the template.
-- `TENKI_WORKSPACE_ID`: required for one-time `mode: create`.
-- `TENKI_TEMPLATE_ID`: required after bootstrap for `mode: update`, `build-only`, and `publish-only`.
+- `TENKI_WORKSPACE_ID`: required when the named template does not exist yet.

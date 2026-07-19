@@ -6,6 +6,7 @@ on:
       - "setup-cli/src/**"
       - "setup-cli/package.json"
       - "setup-cli/pnpm-lock.yaml"
+      - "template-build/**"
       - "template-publish/src/**"
       - "template-publish/package.json"
       - "template-publish/pnpm-lock.yaml"
@@ -18,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        action: [setup-cli, template-publish]
+        action: [setup-cli, template-build, template-publish]
     defaults:
       run:
         working-directory: ${{ matrix.action }}
@@ -34,6 +35,7 @@ jobs:
           cache-dependency-path: ${{ matrix.action }}/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - run: pnpm test
       - name: Verify dist is in sync
         run: |
           if ! git diff --exit-code dist/; then

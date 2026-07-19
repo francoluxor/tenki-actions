@@ -12,6 +12,8 @@ import {
 import { readInputs, type Inputs } from "./inputs.js";
 
 async function run(): Promise<void> {
+  core.warning("template-publish is deprecated; migrate to TenkiCloud/actions/template-build@v1");
+
   const token = process.env.TENKI_AUTH_TOKEN;
   if (!token?.trim()) {
     core.error("missing TENKI_AUTH_TOKEN env var");

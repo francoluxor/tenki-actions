@@ -1,5 +1,5 @@
-name: Publish Tenki Sandbox Template
-description: Create, update, build, and publish Tenki sandbox templates through the tenki CLI.
+name: '[Deprecated] Publish Tenki Sandbox Template'
+description: Deprecated; use template-build with tenki.template.json. Legacy create, update, build, and publish workflow.
 author: Tenki Cloud
 inputs:
   mode:

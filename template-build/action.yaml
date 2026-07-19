@@ -1,0 +1,60 @@
+name: Build Tenki Sandbox Template
+description: Create or update and build a Tenki sandbox template from tenki.template.json.
+author: Tenki Cloud
+inputs:
+  template:
+    description: Template name or ID.
+    required: true
+  project-id:
+    description: Tenki project ID.
+    required: true
+  workspace-id:
+    description: Tenki workspace ID. Required when the named template does not exist yet.
+    required: false
+  file:
+    description: Template specification path. Empty discovers tenki.template.json or uses the existing remote definition.
+    required: false
+  build-env:
+    description: Newline-separated environment variable names to persist in the build specification.
+    required: false
+  build-secret-env:
+    description: Newline-separated environment variable names to forward only for this build.
+    required: false
+  wait-timeout:
+    description: Local build observation timeout. Set to 0 to disable.
+    required: false
+    default: 15m
+  wait-durable:
+    description: Wait for the snapshot upload to finish before succeeding.
+    required: false
+    default: 'true'
+  publish-raw-image:
+    description: Override whether the build also publishes a standalone compressed raw disk image. Empty uses the Tenki default.
+    required: false
+outputs:
+  image:
+    description: Immutable registry image digest ref produced by the build.
+  image-digest-ref:
+    description: Immutable registry image digest ref produced by the build.
+  image-digest:
+    description: Image digest produced by the build.
+  template-id:
+    description: Template ID.
+  template-build-id:
+    description: Template build ID.
+  template-build:
+    description: Template-local build number.
+  template-build-state:
+    description: Template build state.
+  snapshot-id:
+    description: Snapshot ID produced by the build.
+  spec-hash:
+    description: Canonical template specification hash.
+  failure-reason:
+    description: Build failure reason, empty on success.
+runs:
+  using: node24
+  main: dist/index.js
+branding:
+  icon: package
+  color: blue

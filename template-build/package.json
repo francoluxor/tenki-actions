@@ -1,0 +1,21 @@
+{
+  "name": "@tenkicloud/template-build-action",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.22.0",
+  "scripts": {
+    "build": "ncc build src/main.ts -o dist --source-map",
+    "test": "tsc --noEmit && node --test test/*.test.mjs"
+  },
+  "dependencies": {
+    "@actions/core": "3.0.1",
+    "@actions/exec": "3.0.0",
+    "@actions/io": "3.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "25.6.2",
+    "@vercel/ncc": "0.38.4",
+    "typescript": "6.0.3"
+  }
+}
