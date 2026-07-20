@@ -1,5 +1,5 @@
 name: Build Tenki Sandbox Template
-description: Create or update and build a Tenki sandbox template from tenki.template.json.
+description: Create or update and build a Tenki sandbox template from .tenki/template.json.
 author: Tenki Cloud
 inputs:
   template:
@@ -12,7 +12,7 @@ inputs:
     description: Tenki workspace ID. Required when the named template does not exist yet.
     required: false
   file:
-    description: Template specification path. Empty discovers tenki.template.json or uses the existing remote definition.
+    description: Template specification path. Empty discovers .tenki/template.json (or the deprecated tenki.template.json) or uses the existing remote definition.
     required: false
   build-env:
     description: Newline-separated environment variable names to persist in the build specification.

@@ -1,7 +1,7 @@
 # template-publish
 
 > [!WARNING]
-> This action is deprecated. Use [`template-build`](../template-build) with a `tenki.template.json` specification. `template-publish` remains available for legacy setup-script templates.
+> This action is deprecated. Use [`template-build`](../template-build) with a `.tenki/template.json` specification. `template-publish` remains available for legacy setup-script templates.
 
 Drives sandbox template publishing through the `tenki` CLI. Add `setup-cli` first, or provide `tenki` on `$PATH` yourself.
 

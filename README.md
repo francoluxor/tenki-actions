@@ -5,7 +5,7 @@ First-party GitHub Actions for Tenki workflows.
 ## Actions
 
 - [`setup-cli`](./setup-cli) installs the `tenki` CLI on Linux and macOS runners.
-- [`template-build`](./template-build) creates or updates and builds sandbox templates from `tenki.template.json`.
+- [`template-build`](./template-build) creates or updates and builds sandbox templates from `.tenki/template.json`.
 - [`template-publish`](./template-publish) is deprecated and remains available for legacy setup-script templates.
 
 ## Typical template workflow
@@ -19,7 +19,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "tenki.template.json"
+      - ".tenki/template.json"
 
 jobs:
   build:

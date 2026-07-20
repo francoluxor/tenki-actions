@@ -1,5 +1,5 @@
 name: '[Deprecated] Publish Tenki Sandbox Template'
-description: Deprecated; use template-build with tenki.template.json. Legacy create, update, build, and publish workflow.
+description: Deprecated; use template-build with .tenki/template.json. Legacy create, update, build, and publish workflow.
 author: Tenki Cloud
 inputs:
   mode:

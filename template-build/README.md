@@ -1,6 +1,6 @@
 # template-build
 
-Creates or updates a sandbox template from `tenki.template.json`, waits for the build, and returns its immutable registry image ref. Add `setup-cli` first, or provide `tenki` on `$PATH` yourself.
+Creates or updates a sandbox template from `.tenki/template.json`, waits for the build, and returns its immutable registry image ref. Add `setup-cli` first, or provide `tenki` on `$PATH` yourself.
 
 The action runs `tenki template build <name-or-id> --json`. If the named template does not exist, the CLI creates it from the local specification. If it already exists, the CLI updates its definition before building.
 
@@ -13,7 +13,7 @@ on:
   push:
     branches: [main]
     paths:
-      - "tenki.template.json"
+      - ".tenki/template.json"
 
 jobs:
   build:
@@ -39,7 +39,7 @@ jobs:
 
 `workspace-id` is only needed when the named template must be created. Keeping it in every run makes the same workflow work for both the first and later builds.
 
-By default the CLI discovers `tenki.template.json` from the runner workspace. Set `file` for another path. If no specification is found, an existing template can still be rebuilt from its remote definition.
+By default the CLI discovers `.tenki/template.json` from the runner workspace. The legacy root `tenki.template.json` path remains discoverable with a deprecation warning. Set `file` for another path. If no specification is found, an existing template can still be rebuilt from its remote definition.
 
 ## Inputs
 
@@ -48,7 +48,7 @@ By default the CLI discovers `tenki.template.json` from the runner workspace. Se
 | `template` | Yes | Template name or ID. A missing name is created from the discovered or explicit specification. |
 | `project-id` | Yes | Project used to find or create the template. |
 | `workspace-id` | On create | Workspace used when creating a missing template. |
-| `file` | No | Specification path. Empty uses CLI discovery for `tenki.template.json`. |
+| `file` | No | Specification path. Empty uses CLI discovery for `.tenki/template.json` (or the deprecated root `tenki.template.json`). |
 | `build-env` | No | Newline-separated env names whose values are stored in the build spec. Do not use for secrets. |
 | `build-secret-env` | No | Newline-separated env names forwarded ephemerally for this build. |
 | `wait-timeout` | No | Local observation timeout. Default `15m`; `0` disables it. |
