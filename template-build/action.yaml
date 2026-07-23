@@ -5,12 +5,6 @@ inputs:
   template:
     description: Template name or ID.
     required: true
-  project-id:
-    description: Tenki project ID.
-    required: true
-  workspace-id:
-    description: Tenki workspace ID. Required when the named template does not exist yet.
-    required: false
   file:
     description: Template specification path. Empty discovers .tenki/template.json (or the deprecated tenki.template.json) or uses the existing remote definition.
     required: false

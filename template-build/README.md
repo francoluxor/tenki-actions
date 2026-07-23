@@ -29,15 +29,13 @@ jobs:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           template: node-api
-          workspace-id: ${{ secrets.TENKI_WORKSPACE_ID }}
-          project-id: ${{ secrets.TENKI_PROJECT_ID }}
           build-secret-env: |
             GITHUB_TOKEN
             NPM_TOKEN
       - run: echo "Built ${{ steps.template.outputs.image }}"
 ```
 
-`workspace-id` is only needed when the named template must be created. Keeping it in every run makes the same workflow work for both the first and later builds.
+The API key determines the Workspace for both existing and newly created templates.
 
 By default the CLI discovers `.tenki/template.json` from the runner workspace. The legacy root `tenki.template.json` path remains discoverable with a deprecation warning. Set `file` for another path. If no specification is found, an existing template can still be rebuilt from its remote definition.
 
@@ -46,8 +44,6 @@ By default the CLI discovers `.tenki/template.json` from the runner workspace. T
 | Input | Required | Description |
 | --- | --- | --- |
 | `template` | Yes | Template name or ID. A missing name is created from the discovered or explicit specification. |
-| `project-id` | Yes | Project used to find or create the template. |
-| `workspace-id` | On create | Workspace used when creating a missing template. |
 | `file` | No | Specification path. Empty uses CLI discovery for `.tenki/template.json` (or the deprecated root `tenki.template.json`). |
 | `build-env` | No | Newline-separated env names whose values are stored in the build spec. Do not use for secrets. |
 | `build-secret-env` | No | Newline-separated env names forwarded ephemerally for this build. |

@@ -11,13 +11,10 @@ async function run(): Promise<void> {
     "template",
     "build",
     inputs.template,
-    "--project",
-    inputs.projectId,
     "--wait-timeout",
     inputs.waitTimeout,
     "--json",
   ];
-  if (inputs.workspaceId) args.push("--workspace", inputs.workspaceId);
   if (inputs.file) args.push("--file", inputs.file);
   for (const name of inputs.buildEnv) args.push("--build-env", name);
   for (const name of inputs.buildSecretEnv) args.push("--build-secret-env", name);

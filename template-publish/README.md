@@ -18,7 +18,6 @@ Drives sandbox template publishing through the `tenki` CLI. Add `setup-cli` firs
 
 - `tenki` is available on `$PATH`. The recommended setup is `TenkiCloud/actions/setup-cli@v1`.
 - `TENKI_AUTH_TOKEN` is set in `env`.
-- A Tenki project ID is available.
 - For `mode: update`, `build-only`, and `publish-only`, you already know the template ID.
 
 ## One-time bootstrap (`mode: create`)
@@ -44,8 +43,6 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NODE_AUTH_TOKEN }}
         with:
           mode: create
-          workspace-id: ${{ secrets.TENKI_WORKSPACE_ID }}
-          project-id: ${{ secrets.TENKI_PROJECT_ID }}
           name: ci-template
           setup-script-path: .tenki/setup.sh
           base-image-id: sandbox
@@ -88,7 +85,6 @@ jobs:
           TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
         with:
           mode: update
-          project-id: ${{ secrets.TENKI_PROJECT_ID }}
           template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
           setup-script-path: .tenki/setup.sh
 ```
@@ -104,7 +100,6 @@ Use this when another job must smoke test before publishing.
     TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
   with:
     mode: build-only
-    project-id: ${{ secrets.TENKI_PROJECT_ID }}
     template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
 ```
 
@@ -121,7 +116,6 @@ Use this after an external smoke test passes.
     TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
   with:
     mode: publish-only
-    project-id: ${{ secrets.TENKI_PROJECT_ID }}
     template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
     image: my-workspace/ci-template:latest
 ```
@@ -145,7 +139,6 @@ jobs:
           TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
         with:
           mode: build-only
-          project-id: ${{ secrets.TENKI_PROJECT_ID }}
           template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
 
   smoke:
@@ -165,7 +158,6 @@ jobs:
           TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
         with:
           mode: publish-only
-          project-id: ${{ secrets.TENKI_PROJECT_ID }}
           template-id: ${{ secrets.TENKI_TEMPLATE_ID }}
 ```
 
@@ -174,8 +166,6 @@ jobs:
 | Input | Required | Modes | Description |
 | --- | --- | --- | --- |
 | `mode` | Yes | all | One of `create`, `update`, `build-only`, `publish-only`. |
-| `project-id` | Yes | all | Tenki project ID. |
-| `workspace-id` | create | create | Tenki workspace ID. Required because GitHub runners have no saved workspace context. |
 | `name` | create | create | Template name for a new template. |
 | `template-id` | non-create | update, build-only, publish-only | Existing template ID. Rejected in `create`. |
 | `image` | No | create, update, publish-only | Registry image ref `<workspace>/<artifact>[:tag]`. When set, publish uses `tenki sandbox registry publish`. Omit only for legacy template publish compatibility. |
@@ -237,7 +227,7 @@ Values are masked with `core.setSecret()` before the action invokes `tenki`. Log
 The action validates inputs before invoking `tenki`:
 
 - `create` rejects `template-id`.
-- `create` requires `workspace-id`, `project-id`, `name`, and setup script content or path.
+- `create` requires `name` and setup script content or path.
 - Non-create modes require `template-id`.
 - `update` requires at least one config field.
 - `build-only` and `publish-only` reject config fields.

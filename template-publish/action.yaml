@@ -5,12 +5,6 @@ inputs:
   mode:
     description: create, update, build-only, or publish-only.
     required: true
-  project-id:
-    description: Tenki project ID.
-    required: true
-  workspace-id:
-    description: Tenki workspace ID. Required for create.
-    required: false
   name:
     description: Template name. Required for create.
     required: false

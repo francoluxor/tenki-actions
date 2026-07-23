@@ -31062,8 +31062,6 @@ function getIDToken(aud) {
 function readInputs() {
     const inputs = {
         template: getInput("template", { required: true }),
-        projectId: getInput("project-id", { required: true }),
-        workspaceId: getInput("workspace-id"),
         file: getInput("file"),
         buildEnv: uniqueMultilineInput("build-env"),
         buildSecretEnv: uniqueMultilineInput("build-secret-env"),
@@ -31177,14 +31175,10 @@ async function run() {
         "template",
         "build",
         inputs.template,
-        "--project",
-        inputs.projectId,
         "--wait-timeout",
         inputs.waitTimeout,
         "--json",
     ];
-    if (inputs.workspaceId)
-        args.push("--workspace", inputs.workspaceId);
     if (inputs.file)
         args.push("--file", inputs.file);
     for (const name of inputs.buildEnv)

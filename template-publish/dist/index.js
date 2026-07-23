@@ -31007,8 +31007,6 @@ async function readInputs() {
     const baseImageId = getInput("base-image-id");
     const inputs = {
         mode,
-        projectId: getInput("project-id", { required: true }),
-        workspaceId: getInput("workspace-id"),
         name: getInput("name"),
         templateId: getInput("template-id"),
         image: getInput("image"),
@@ -31039,8 +31037,6 @@ function validate(inputs) {
     if (inputs.mode === "create") {
         if (inputs.templateId)
             errors.push("incompatible inputs: template-id is not allowed with mode create");
-        if (!inputs.workspaceId)
-            errors.push("incompatible inputs: workspace-id is required with mode create");
         if (!inputs.name)
             errors.push("incompatible inputs: name is required with mode create");
         if (!inputs.setupScript)
@@ -31154,10 +31150,6 @@ async function run() {
             "sandbox",
             "template",
             "create",
-            "--workspace",
-            inputs.workspaceId,
-            "--project",
-            inputs.projectId,
             "--name",
             inputs.name,
             "--setup-script",

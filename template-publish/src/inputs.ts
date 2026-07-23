@@ -6,8 +6,6 @@ export type Mode = "create" | "update" | "build-only" | "publish-only";
 
 export interface Inputs {
   mode: Mode;
-  projectId: string;
-  workspaceId: string;
   name: string;
   templateId: string;
   image: string;
@@ -33,8 +31,6 @@ export async function readInputs(): Promise<Inputs> {
   const baseImageId = core.getInput("base-image-id");
   const inputs: Inputs = {
     mode,
-    projectId: core.getInput("project-id", { required: true }),
-    workspaceId: core.getInput("workspace-id"),
     name: core.getInput("name"),
     templateId: core.getInput("template-id"),
     image: core.getInput("image"),
@@ -65,7 +61,6 @@ function validate(inputs: Inputs): void {
   }
   if (inputs.mode === "create") {
     if (inputs.templateId) errors.push("incompatible inputs: template-id is not allowed with mode create");
-    if (!inputs.workspaceId) errors.push("incompatible inputs: workspace-id is required with mode create");
     if (!inputs.name) errors.push("incompatible inputs: name is required with mode create");
     if (!inputs.setupScript) errors.push("incompatible inputs: setup-script or setup-script-path is required with mode create");
   } else if (!inputs.templateId) {

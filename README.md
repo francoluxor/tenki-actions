@@ -35,8 +35,6 @@ jobs:
           TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
         with:
           template: node-api
-          workspace-id: ${{ secrets.TENKI_WORKSPACE_ID }}
-          project-id: ${{ secrets.TENKI_PROJECT_ID }}
       - run: echo "Built ${{ steps.template.outputs.image }}"
 ```
 
@@ -64,5 +62,5 @@ Pin the CLI independently:
 Required secrets for most workflows:
 
 - `TENKI_API_KEY` or `TENKI_AUTH_TOKEN`: Tenki API credential.
-- `TENKI_PROJECT_ID`: project that owns the template.
-- `TENKI_WORKSPACE_ID`: required when the named template does not exist yet.
+
+The credential determines the Workspace for template operations.

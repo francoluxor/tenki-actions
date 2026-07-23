@@ -2,8 +2,6 @@ import * as core from "@actions/core";
 
 export interface Inputs {
   template: string;
-  projectId: string;
-  workspaceId: string;
   file: string;
   buildEnv: string[];
   buildSecretEnv: string[];
@@ -15,8 +13,6 @@ export interface Inputs {
 export function readInputs(): Inputs {
   const inputs: Inputs = {
     template: core.getInput("template", { required: true }),
-    projectId: core.getInput("project-id", { required: true }),
-    workspaceId: core.getInput("workspace-id"),
     file: core.getInput("file"),
     buildEnv: uniqueMultilineInput("build-env"),
     buildSecretEnv: uniqueMultilineInput("build-secret-env"),
