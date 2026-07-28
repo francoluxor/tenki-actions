@@ -30953,7 +30953,7 @@ function collectForwardedEnv(input, prefix) {
 async function requireTenki() {
     const found = await which("tenki", false);
     if (!found) {
-        throw new Error("tenki not found on PATH; add 'TenkiCloud/actions/setup-cli@v1' step before this one");
+        throw new Error("tenki not found on PATH; add 'LuxorLabs/tenki-actions/setup-cli@v1' step before this one");
     }
 }
 async function tenkiJSON(args, env = {}) {
@@ -31128,7 +31128,7 @@ async function resolveSetupScript() {
 
 
 async function run() {
-    warning("template-publish is deprecated; migrate to TenkiCloud/actions/template-build@v1");
+    warning("template-publish is deprecated; migrate to LuxorLabs/tenki-actions/template-build@v1");
     const token = process.env.TENKI_AUTH_TOKEN;
     if (!token?.trim()) {
         core_error("missing TENKI_AUTH_TOKEN env var");

@@ -16,7 +16,7 @@ Drives sandbox template publishing through the `tenki` CLI. Add `setup-cli` firs
 
 ## Prerequisites
 
-- `tenki` is available on `$PATH`. The recommended setup is `TenkiCloud/actions/setup-cli@v1`.
+- `tenki` is available on `$PATH`. The recommended setup is `LuxorLabs/tenki-actions/setup-cli@v1`.
 - `TENKI_AUTH_TOKEN` is set in `env`.
 - For `mode: update`, `build-only`, and `publish-only`, you already know the template ID.
 
@@ -35,8 +35,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: TenkiCloud/actions/setup-cli@v1
-      - uses: TenkiCloud/actions/template-publish@v1
+      - uses: LuxorLabs/tenki-actions/setup-cli@v1
+      - uses: LuxorLabs/tenki-actions/template-publish@v1
         id: publish
         env:
           TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
@@ -78,8 +78,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: TenkiCloud/actions/setup-cli@v1
-      - uses: TenkiCloud/actions/template-publish@v1
+      - uses: LuxorLabs/tenki-actions/setup-cli@v1
+      - uses: LuxorLabs/tenki-actions/template-publish@v1
         id: publish
         env:
           TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
@@ -94,7 +94,7 @@ jobs:
 Use this when another job must smoke test before publishing.
 
 ```yaml
-- uses: TenkiCloud/actions/template-publish@v1
+- uses: LuxorLabs/tenki-actions/template-publish@v1
   id: build
   env:
     TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
@@ -110,7 +110,7 @@ Use this when another job must smoke test before publishing.
 Use this after an external smoke test passes.
 
 ```yaml
-- uses: TenkiCloud/actions/template-publish@v1
+- uses: LuxorLabs/tenki-actions/template-publish@v1
   id: publish
   env:
     TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
@@ -132,8 +132,8 @@ jobs:
       template-build-id: ${{ steps.build.outputs.template-build-id }}
     steps:
       - uses: actions/checkout@v4
-      - uses: TenkiCloud/actions/setup-cli@v1
-      - uses: TenkiCloud/actions/template-publish@v1
+      - uses: LuxorLabs/tenki-actions/setup-cli@v1
+      - uses: LuxorLabs/tenki-actions/template-publish@v1
         id: build
         env:
           TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
@@ -152,8 +152,8 @@ jobs:
     needs: smoke
     runs-on: ubuntu-latest
     steps:
-      - uses: TenkiCloud/actions/setup-cli@v1
-      - uses: TenkiCloud/actions/template-publish@v1
+      - uses: LuxorLabs/tenki-actions/setup-cli@v1
+      - uses: LuxorLabs/tenki-actions/template-publish@v1
         env:
           TENKI_AUTH_TOKEN: ${{ secrets.TENKI_AUTH_TOKEN }}
         with:
@@ -232,7 +232,7 @@ The action validates inputs before invoking `tenki`:
 - `update` requires at least one config field.
 - `build-only` and `publish-only` reject config fields.
 - Missing `TENKI_AUTH_TOKEN` fails before any CLI call.
-- Missing `tenki` fails with: `tenki not found on PATH; add 'TenkiCloud/actions/setup-cli@v1' step before this one`.
+- Missing `tenki` fails with: `tenki not found on PATH; add 'LuxorLabs/tenki-actions/setup-cli@v1' step before this one`.
 
 If build fails, the action exits non-zero and does not call publish. Existing publications stay active.
 

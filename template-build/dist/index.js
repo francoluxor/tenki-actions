@@ -31127,7 +31127,7 @@ class TenkiCommandError extends Error {
 async function requireTenki() {
     const found = await which("tenki", false);
     if (!found) {
-        throw new Error("tenki not found on PATH; add 'TenkiCloud/actions/setup-cli@v1' before this action");
+        throw new Error("tenki not found on PATH; add 'LuxorLabs/tenki-actions/setup-cli@v1' before this action");
     }
 }
 async function tenkiJSON(args) {

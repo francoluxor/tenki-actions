@@ -26,10 +26,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: TenkiCloud/actions/setup-cli@v1
+      - uses: LuxorLabs/tenki-actions/setup-cli@v1
         with:
           version: latest
-      - uses: TenkiCloud/actions/template-build@v1
+      - uses: LuxorLabs/tenki-actions/template-build@v1
         id: template
         env:
           TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
@@ -43,14 +43,14 @@ jobs:
 Pin action versions by major tag for patch updates:
 
 ```yaml
-- uses: TenkiCloud/actions/setup-cli@v1
-- uses: TenkiCloud/actions/template-build@v1
+- uses: LuxorLabs/tenki-actions/setup-cli@v1
+- uses: LuxorLabs/tenki-actions/template-build@v1
 ```
 
 Pin the CLI independently:
 
 ```yaml
-- uses: TenkiCloud/actions/setup-cli@v1
+- uses: LuxorLabs/tenki-actions/setup-cli@v1
   with:
     version: vX.Y.Z
 ```

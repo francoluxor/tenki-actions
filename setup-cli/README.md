@@ -16,7 +16,7 @@ jobs:
   tenki:
     runs-on: ubuntu-latest
     steps:
-      - uses: TenkiCloud/actions/setup-cli@v1
+      - uses: LuxorLabs/tenki-actions/setup-cli@v1
         with:
           version: latest
       - run: tenki --version
@@ -25,7 +25,7 @@ jobs:
 Pin an exact CLI release:
 
 ```yaml
-- uses: TenkiCloud/actions/setup-cli@v1
+- uses: LuxorLabs/tenki-actions/setup-cli@v1
   with:
     version: vX.Y.Z
 ```
@@ -34,7 +34,7 @@ Use the output in later steps:
 
 ```yaml
 - id: setup-tenki
-  uses: TenkiCloud/actions/setup-cli@v1
+  uses: LuxorLabs/tenki-actions/setup-cli@v1
 - run: echo "Installed ${{ steps.setup-tenki.outputs.tenki-version }}"
 ```
 
