@@ -2,8 +2,13 @@ import * as core from "@actions/core";
 import { readInputs } from "./inputs.js";
 import { requireTenki, TenkiCommandError, tenkiJSON, type TemplateBuildResult } from "./tenki.js";
 
+// The CLI forwards these as ephemeral build secrets even when absent from
+// build-secret-env, so register them for masking to match.
+const AUTO_SECRET_ENV = ["GIT_TOKEN", "GH_TOKEN", "GITHUB_TOKEN"];
+
 async function run(): Promise<void> {
   maskAuth();
+  maskAutoDetectedSecrets();
   await requireTenki();
 
   const inputs = readInputs();
@@ -51,6 +56,15 @@ function maskAuth(): void {
   }
   if (token) core.setSecret(token);
   if (apiKey) core.setSecret(apiKey);
+}
+
+function maskAutoDetectedSecrets(): void {
+  // Mask-only, never appended to build-secret-env; non-empty check mirrors the
+  // CLI so we register exactly what it forwards.
+  for (const name of AUTO_SECRET_ENV) {
+    const value = process.env[name];
+    if (value) core.setSecret(value);
+  }
 }
 
 function setOutputs(build: TemplateBuildResult): void {

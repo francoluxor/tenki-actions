@@ -34482,9 +34482,12 @@ async function run() {
         }
     }
     const installDir = (0,external_node_fs_namespaceObject.mkdtempSync)(external_node_path_namespaceObject.join(external_node_os_namespaceObject.tmpdir(), "tenki-cli-install-"));
-    const command = requestedVersion === "latest"
+    const pipeline = requestedVersion === "latest"
         ? `curl -fsSL ${INSTALL_URL} | bash`
         : `curl -fsSL ${INSTALL_URL} | bash -s -- --version ${normalizedVersion}`;
+    // Without pipefail a failed fetch (curl -f) is masked by bash's exit 0 and
+    // only surfaces later as a confusing "tenki: not found".
+    const command = `set -o pipefail; ${pipeline}`;
     await exec_exec("bash", ["-c", command], {
         env: { ...process.env, TENKI_INSTALL_DIR: installDir },
     });

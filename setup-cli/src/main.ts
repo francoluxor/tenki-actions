@@ -29,10 +29,13 @@ async function run(): Promise<void> {
   }
 
   const installDir = mkdtempSync(path.join(os.tmpdir(), "tenki-cli-install-"));
-  const command =
+  const pipeline =
     requestedVersion === "latest"
       ? `curl -fsSL ${INSTALL_URL} | bash`
       : `curl -fsSL ${INSTALL_URL} | bash -s -- --version ${normalizedVersion}`;
+  // Without pipefail a failed fetch (curl -f) is masked by bash's exit 0 and
+  // only surfaces later as a confusing "tenki: not found".
+  const command = `set -o pipefail; ${pipeline}`;
 
   await exec.exec("bash", ["-c", command], {
     env: { ...process.env, TENKI_INSTALL_DIR: installDir },
