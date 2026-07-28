@@ -34464,6 +34464,7 @@ const external_node_path_namespaceObject = __WEBPACK_EXTERNAL_createRequire(impo
 const TOOL_NAME = "tenki";
 const INSTALL_URL = "https://tenki.cloud/install.sh";
 const SUPPORTED_PLATFORMS = new Set(["linux/x64", "darwin/arm64"]);
+const SEMVER = /^[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.]+)?(\+[A-Za-z0-9.]+)?$/;
 async function run() {
     const platform = `${external_node_os_namespaceObject.platform()}/${external_node_os_namespaceObject.arch()}`;
     if (!SUPPORTED_PLATFORMS.has(platform)) {
@@ -34472,6 +34473,11 @@ async function run() {
     }
     const requestedVersion = getInput("version") || "latest";
     const normalizedVersion = requestedVersion.replace(/^v/, "");
+    // normalizedVersion reaches a bash -c command, so reject anything but a
+    // strict semver to keep shell metacharacters out.
+    if (requestedVersion !== "latest" && !SEMVER.test(normalizedVersion)) {
+        throw new Error(`invalid version ${JSON.stringify(requestedVersion)}; expected "latest" or a semver like 1.2.3`);
+    }
     if (requestedVersion !== "latest") {
         const cached = find(TOOL_NAME, normalizedVersion);
         if (cached) {
